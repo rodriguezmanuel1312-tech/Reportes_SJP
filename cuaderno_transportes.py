@@ -87,13 +87,22 @@ def exportar_xlsx(registros: list[dict[str, Any]]) -> bytes | None:
 def generar_pdf_cobro(viajes: list[dict[str, Any]], cliente: str, total: int, desde: date, hasta: date) -> bytes:
     pdf = FPDF()
     pdf.add_page()
+    
+    # 📸 Intentar insertar el logo en la esquina superior izquierda
+    try:
+        # x=10 (margen izquierdo), y=8 (margen superior), w=30 (ancho de la imagen en mm)
+        pdf.image("logo.png", x=10, y=8, w=30)
+    except Exception:
+        pass # Si no encuentra el logo por algún motivo, crea el PDF sin caerse
+        
+    # Textos de encabezado
     pdf.set_font("Arial", "B", 16)
     pdf.cell(0, 10, "S.J.P TRANSPORTE", ln=True, align="C")
     pdf.set_font("Arial", "B", 12)
     pdf.cell(0, 10, f"Estado de Pago: {cliente}", ln=True, align="C")
     pdf.set_font("Arial", "", 10)
     pdf.cell(0, 10, f"Período: {desde.strftime('%d/%m/%Y')} al {hasta.strftime('%d/%m/%Y')}", ln=True, align="C")
-    pdf.ln(5)
+    pdf.ln(10) # Espacio extra antes de empezar la tabla
     
     # Encabezados de tabla
     pdf.set_font("Arial", "B", 10)
@@ -112,10 +121,12 @@ def generar_pdf_cobro(viajes: list[dict[str, Any]], cliente: str, total: int, de
         pdf.cell(30, 8, str(r.get("cantidad", "")), border=1)
         pdf.cell(40, 8, pesos(r.get("monto", 0)), border=1, ln=True)
         
+    # Total
     pdf.ln(5)
     pdf.set_font("Arial", "B", 12)
     pdf.cell(150, 10, "TOTAL A COBRAR:", align="R")
     pdf.cell(40, 10, pesos(total), border=1, align="C", ln=True)
+    
     return pdf.output(dest="S").encode("latin-1")
 
 def agregar_registro(form_data: dict[str, Any]) -> None:
