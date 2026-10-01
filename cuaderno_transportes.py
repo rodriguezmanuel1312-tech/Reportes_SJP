@@ -135,7 +135,7 @@ def agregar_registro(form_data: dict[str, Any]) -> None:
     form_data["accion"] = "agregar"
     if usa_google_sheets():
         try:
-            requests.post(GOOGLE_SHEET_URL, json=form_data, timeout=10)
+            requests.post(GOOGLE_SHEET_URL, json=form_data, timeout=40)
             cargar_desde_sheets.clear()
         except Exception:
             pass
