@@ -8,6 +8,7 @@ import json
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any
+import base64
 
 import pandas as pd
 import plotly.express as px
@@ -183,7 +184,12 @@ def mostrar_anotar() -> None:
                 st.toast("⚠️ Revisa el cliente y el monto.", icon="⚠️")
                 return
             
-            with st.spinner("Guardando..."):
+            with st.spinner("Guardando en el sistema y subiendo boleta..."):
+                # Convertir la foto a código para enviarla a Drive
+                foto_b64 = ""
+                if foto is not None:
+                    foto_b64 = base64.b64encode(foto.getvalue()).decode("utf-8")
+
                 agregar_registro({
                     "fecha": fecha.isoformat(),
                     "patente": patente,
@@ -192,11 +198,13 @@ def mostrar_anotar() -> None:
                     "cantidad": cantidad.strip(),
                     "contraparte": contraparte_final,
                     "detalle": detalle.strip(),
-                    "monto": int(monto)
+                    "monto": int(monto),
+                    "foto_base64": foto_b64  # Se envía la foto oculta en el paquete
                 })
+                
             st.toast("Movimiento registrado con éxito", icon="✅")
             if foto:
-                st.toast("📷 Comprobante adjuntado al registro local.", icon="📎")
+                st.toast("📷 Comprobante guardado en Google Drive", icon="📎")
             st.rerun()
 
     registros = cargar_registros()
